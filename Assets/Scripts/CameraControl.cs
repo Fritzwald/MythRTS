@@ -64,10 +64,33 @@ public class CameraControl : MonoBehaviour
 			}
 		}
 
-        
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) || Input.mousePosition.x < screenWidth*0.01f + intBoundary)
+		{
+			transform.position += -transform.right*cameraVelocity*Time.deltaTime;
+		}
+		if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) || Input.mousePosition.y > screenHeight*0.99f - intBoundary)
+		{
+			transform.position += transform.forward*cameraVelocity*Time.deltaTime;
+		}
+		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) || Input.mousePosition.y < screenHeight*0.01f + intBoundary)
+		{
+			transform.position += -transform.forward*cameraVelocity*Time.deltaTime;
+		}
+		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow) || Input.mousePosition.x > screenWidth*0.99f - intBoundary)
+		{
+			transform.position += transform.right*cameraVelocity*Time.deltaTime;
+		}
+		if (Input.GetKey(KeyCode.Q))
+		{
+			GetComponent<Rigidbody>().AddTorque(-transform.up*rotateVelocity);
+		}
+		if (Input.GetKey(KeyCode.E))
+		{
+			GetComponent<Rigidbody>().AddTorque(transform.up*rotateVelocity);
+		}
     }
 
-    private void FixedUpdate() {
+    /*private void FixedUpdate() {
         // Camera side movement
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) || Input.mousePosition.x < screenWidth*0.01f + intBoundary)
 		{
@@ -95,5 +118,5 @@ public class CameraControl : MonoBehaviour
 		}
 		gameObject.GetComponent<Rigidbody>().velocity = Vector3.ClampMagnitude(gameObject.GetComponent<Rigidbody>().velocity, maxCameraVelocity);
 		gameObject.GetComponent<Rigidbody>().angularVelocity = Vector3.ClampMagnitude(gameObject.GetComponent<Rigidbody>().angularVelocity, maxRotateVelocity);
-    }
+    }*/
 }
