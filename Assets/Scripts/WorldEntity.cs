@@ -5,6 +5,10 @@ using UnityEngine;
 public class WorldEntity : Entity
 {
 
+    private void Awake() {
+        
+    }
+
     public override void OnDestroyed()
     {
 
@@ -16,6 +20,6 @@ public class WorldEntity : Entity
     }
 
     public virtual void SelectObject(){
-        
+
     }
 }

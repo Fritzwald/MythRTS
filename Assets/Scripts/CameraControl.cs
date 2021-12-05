@@ -82,11 +82,11 @@ public class CameraControl : MonoBehaviour
 		}
 		if (Input.GetKey(KeyCode.Q))
 		{
-			GetComponent<Rigidbody>().AddTorque(-transform.up*rotateVelocity);
+			transform.Rotate(-transform.up*rotateVelocity*Time.deltaTime);
 		}
 		if (Input.GetKey(KeyCode.E))
 		{
-			GetComponent<Rigidbody>().AddTorque(transform.up*rotateVelocity);
+			transform.Rotate(transform.up*rotateVelocity*Time.deltaTime);
 		}
     }
 
