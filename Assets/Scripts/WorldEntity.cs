@@ -14,4 +14,8 @@ public class WorldEntity : Entity
     {
 
     }
+
+    public virtual void SelectObject(){
+        
+    }
 }
