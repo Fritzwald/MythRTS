@@ -41,10 +41,19 @@ public class SelectionControl : MonoBehaviour
 		}
 		else if (Input.GetKeyUp(KeyCode.Mouse0))
 		{
-            
+			SelectedEntityManager.Instance.ClearSelection();
+            Entity mouseReleaseEntity = MouseReleaseSelect();
+			if(mouseReleaseEntity != null){
+				mouseReleaseEntity.OnSelect();
+			}
+
 			if(boxEndPos != Vector2.zero && boxStartPos != Vector2.zero)
 			{
-                SelectEntities();
+				
+                foreach (Entity ent in SelectEntities()){
+					ent.OnSelect();
+				}
+				
 				// Deselect first
 				//Deselect();
 				// New Selection Box
@@ -91,7 +100,22 @@ public class SelectionControl : MonoBehaviour
 		selectImage.GetComponent<RectTransform>().offsetMax = Vector2.zero;
 	}
 
-    private void SelectEntities() {
+	private Entity MouseReleaseSelect(){
+		RaycastHit hit;
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if(Physics.Raycast(ray, out hit, 100, selectableLayer)){
+			if(hit.collider.GetComponent<Entity>())
+            	return hit.collider.GetComponent<Entity>();
+			else
+				return null;
+        }
+		else
+			return null;
+	}
+
+    private List<Entity> SelectEntities() {
         Vector3 startWorldPos = Vector3.zero;
         Vector3 endWorldPos = Vector3.zero;
 
@@ -107,19 +131,20 @@ public class SelectionControl : MonoBehaviour
         if(Physics.Raycast(endRay, out endHit, 100, groundLayer)){
             endWorldPos = endHit.point;
         }
-        print(boxStartPos);
-        print(boxEndPos);
+        //print(boxStartPos);
+        //print(boxEndPos);
 
         Vector3 midWorldPos = Vector3.Lerp(startWorldPos, endWorldPos, 0.5f);
 
 		Collider[] overlapColliders = Physics.OverlapSphere(midWorldPos, Vector3.Magnitude(endWorldPos-midWorldPos), selectableLayer);
+		//print(overlapColliders.Length);
         List<Entity> selectedEntites = new List<Entity>();
 
         foreach(Collider obj in overlapColliders){
 			//print("Start: " + boxStartPos);
 			//print("End: " + boxEndPos);
 			Vector3 objScreenLoc = Camera.main.WorldToScreenPoint(obj.transform.position);
-            print("ObjPos: " + objScreenLoc);
+            //print("ObjPos: " + objScreenLoc);
 			if (boxStartPos.x < objScreenLoc.x && objScreenLoc.x < boxEndPos.x && boxStartPos.y < objScreenLoc.y && objScreenLoc.y < boxEndPos.y)
 			{
 				selectedEntites.Add(obj.gameObject.GetComponent<Entity>());
@@ -138,7 +163,10 @@ public class SelectionControl : MonoBehaviour
 			}
             
 		}
-        /*foreach(WorldEntity ent in selectedEntites){
+
+		return selectedEntites;
+		//print(selectedEntites.ToArray().Length);
+	        /*foreach(WorldEntity ent in selectedEntites){
             print(ent.currentHealth);
         }*/
         

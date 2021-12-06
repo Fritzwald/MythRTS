@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using UnityEngine.AI;
 
 [System.Serializable]
 public class UnitGroup : MonoBehaviour
@@ -16,9 +17,9 @@ public class UnitGroup : MonoBehaviour
     public UnitProperties unitProperties;
     public GameObject groupContainer;
 
-    public void Start()
+    public virtual void Start()
     {
-        groupContainer = new GameObject();
+        groupContainer = new GameObject("GroupContainer");
         groupContainer.transform.position = Vector3.zero;
         this.transform.parent = groupContainer.transform;
     }
@@ -32,7 +33,7 @@ public class UnitGroup : MonoBehaviour
 
     public void CalcIntendedPositions()
     {
-
+        
     }
 
     public Unit CreateUnit<type>(Vector3 position) where type : Unit
@@ -40,5 +41,29 @@ public class UnitGroup : MonoBehaviour
         GameObject newUnit = Instantiate(unitProperties.unitPrefab, position, Quaternion.identity, groupContainer.transform);
         Unit unitScript = newUnit.AddComponent<type>();
         return unitScript;
+    }
+
+    public void SelectGroup(){
+        foreach(Unit unit in groupUnits){
+            unit.EnableHighlight();
+        }
+        SelectedEntityManager.Instance.AddSelectedEntity(this);
+    }
+
+    public void ClearSelection(){
+        foreach(Unit unit in groupUnits){
+            unit.DisableHighlight();
+        }
+    }
+
+    public void IssueMoveCommand(Vector3 destinationPos){
+        print("Destination: " + destinationPos);
+        foreach(Unit unit in groupUnits){
+            unit.gameObject.GetComponent<NavMeshAgent>().SetDestination(destinationPos);
+        }
+    }
+
+    public virtual void Update() {
+        
     }
 }

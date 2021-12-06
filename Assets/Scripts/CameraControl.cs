@@ -43,7 +43,7 @@ public class CameraControl : MonoBehaviour
 			{
 				Vector3 temp = mainCamera.transform.localPosition;
 				temp.y = Mathf.Clamp(mainCamera.transform.localPosition.y-zoomSpeed, minZoom, maxZoom);
-				temp.z = Mathf.Clamp(mainCamera.transform.localPosition.z+(zoomSpeed/3f), -20f, -6f);
+				temp.z = Mathf.Clamp(mainCamera.transform.localPosition.z+(zoomSpeed/3f), -15f, -6f);
 				Vector3 cameraTarget = temp;
 				mainCamera.transform.localPosition = Vector3.SmoothDamp(mainCamera.transform.localPosition, cameraTarget, ref scrollVelocity, smoothTime);
 				mainCamera.transform.LookAt(gameObject.transform.position);
@@ -57,7 +57,7 @@ public class CameraControl : MonoBehaviour
 			{
 				Vector3 temp = mainCamera.transform.localPosition;
 				temp.y = Mathf.Clamp(mainCamera.transform.localPosition.y+zoomSpeed, minZoom, maxZoom);
-				temp.z = Mathf.Clamp(mainCamera.transform.localPosition.z-(zoomSpeed*3f), -20f, -6f);
+				temp.z = Mathf.Clamp(mainCamera.transform.localPosition.z-(zoomSpeed*3f), -15f, -6f);
 				Vector3 cameraTarget = temp;
 				mainCamera.transform.localPosition = Vector3.SmoothDamp(mainCamera.transform.localPosition, cameraTarget, ref scrollVelocity, smoothTime);
 				mainCamera.transform.LookAt(gameObject.transform.position);

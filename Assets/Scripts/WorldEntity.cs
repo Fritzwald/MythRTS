@@ -5,8 +5,8 @@ using UnityEngine;
 public class WorldEntity : Entity
 {
 
-    private void Awake() {
-        
+    public override void Awake() {
+        base.Awake();
     }
 
     public override void OnDestroyed()
