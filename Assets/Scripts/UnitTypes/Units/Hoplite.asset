@@ -19,6 +19,7 @@ MonoBehaviour:
   movementSpeed: 10
   attackSpeed: 5
   unitRadius: 2
+  defaultUnitFile: 4
   unitGroupPrefab: {fileID: 3083048018538631740, guid: 6742d77c4aae79a438c0ba8c9b245aee,
     type: 3}
   unitPrefab: {fileID: 0}

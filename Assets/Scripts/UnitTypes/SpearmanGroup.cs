@@ -7,7 +7,7 @@ public class SpearmanGroup : UnitGroup
     public override void Start()
     {
         base.Start();
-        CalcIntendedPositions();
+        //CalcIntendedPositions();
         /*foreach(Vector3 pos in intendedGroupPositions)
         {
             Unit newUnit = CreateUnit<Spearman>(pos);
@@ -15,6 +15,10 @@ public class SpearmanGroup : UnitGroup
         }*/
         print("SpearmanGroup Created");
         
+    }
+
+    public override void Update(){
+        UpdateCenterPosition();
     }
 
     

@@ -24,6 +24,10 @@ public class UnitGroup : MonoBehaviour
         this.transform.parent = groupContainer.transform;
     }
 
+    public virtual void Update() {
+        
+    }
+
     public void AssignUnitProperties(UnitProperties unitProps, Vector3 createPosition)
     {
         transform.position = createPosition;
@@ -31,9 +35,19 @@ public class UnitGroup : MonoBehaviour
         
     }
 
-    public void CalcIntendedPositions()
+    public List<Vector3> CalcIntendedPositions(Vector3 destPos)
     {
-        
+        List<Vector3> positions = new List<Vector3>();
+        Vector3 direction = (destPos - transform.position).normalized;
+        direction.y = 0;
+        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+            int rowNumber = (int)(i/unitProperties.defaultUnitFile);
+            Vector3 pos = destPos + new Vector3(-1/direction.x,0,1/direction.z)*(unitSpacing*(i % unitProperties.defaultUnitFile));
+            pos = pos - direction * unitSpacing * rowNumber;
+            pos = pos - new Vector3(-1/direction.x,0,1/direction.z)* (Math.Clamp(groupUnits.ToArray().Length -1,0,unitProperties.defaultUnitFile)*unitSpacing/2);
+            positions.Add(pos);
+        }
+        return positions;
     }
 
     public Unit CreateUnit<type>(Vector3 position) where type : Unit
@@ -58,12 +72,23 @@ public class UnitGroup : MonoBehaviour
 
     public void IssueMoveCommand(Vector3 destinationPos){
         print("Destination: " + destinationPos);
-        foreach(Unit unit in groupUnits){
+        /*foreach(Unit unit in groupUnits){
             unit.gameObject.GetComponent<NavMeshAgent>().SetDestination(destinationPos);
+        }*/
+        List<Vector3> destPositions = CalcIntendedPositions(destinationPos);
+        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+            print(destPositions[i]);
+            groupUnits[i].gameObject.GetComponent<NavMeshAgent>().SetDestination(destPositions[i]);
         }
     }
 
-    public virtual void Update() {
-        
+    public void UpdateCenterPosition(){
+        Vector3 sumOfPositions = Vector3.zero;
+        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+            sumOfPositions += groupUnits[i].transform.position;
+        }
+        transform.position = sumOfPositions / groupUnits.ToArray().Length;
     }
+
+    
 }

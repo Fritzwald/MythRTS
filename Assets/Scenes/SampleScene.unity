@@ -1309,7 +1309,7 @@ MonoBehaviour:
   maxUnitCount: 3
   maxTotalHealth: 0
   currentTotalHealth: 0
-  unitSpacing: 2
+  unitSpacing: 1
   groupUnits:
   - {fileID: 1573136275}
   - {fileID: 1524243570}
