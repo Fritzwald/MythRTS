@@ -35,20 +35,7 @@ public class UnitGroup : MonoBehaviour
         
     }
 
-    public List<Vector3> CalcIntendedPositions(Vector3 destPos)
-    {
-        List<Vector3> positions = new List<Vector3>();
-        Vector3 direction = (destPos - transform.position).normalized;
-        direction.y = 0;
-        for(int i = 0;i < groupUnits.ToArray().Length;i++){
-            int rowNumber = (int)(i/unitProperties.defaultUnitFile);
-            Vector3 pos = destPos + new Vector3(-1/direction.x,0,1/direction.z)*(unitSpacing*(i % unitProperties.defaultUnitFile));
-            pos = pos - direction * unitSpacing * rowNumber;
-            pos = pos - new Vector3(-1/direction.x,0,1/direction.z)* (Math.Clamp(groupUnits.ToArray().Length -1,0,unitProperties.defaultUnitFile)*unitSpacing/2);
-            positions.Add(pos);
-        }
-        return positions;
-    }
+
 
     public Unit CreateUnit<type>(Vector3 position) where type : Unit
     {
@@ -71,15 +58,78 @@ public class UnitGroup : MonoBehaviour
     }
 
     public void IssueMoveCommand(Vector3 destinationPos){
-        print("Destination: " + destinationPos);
-        /*foreach(Unit unit in groupUnits){
-            unit.gameObject.GetComponent<NavMeshAgent>().SetDestination(destinationPos);
-        }*/
         List<Vector3> destPositions = CalcIntendedPositions(destinationPos);
+
+        //this funciton needs work, something is wrong. how to find the most efficient unit pathing among the units?
+        //List<Vector3> destPosWithOrder = FindPositionOrder(destPositions);
+
         for(int i = 0;i < groupUnits.ToArray().Length;i++){
-            print(destPositions[i]);
+            //print(destPosWithOrder[i]);
             groupUnits[i].gameObject.GetComponent<NavMeshAgent>().SetDestination(destPositions[i]);
         }
+    }
+
+    public List<Vector3> FindPositionOrder(List<Vector3> intendedPos){
+        //List<Vector3> orderedPositions = new List<Vector3>(new Vector3[intendedPos.ToArray().Length]);
+        //List<float> distances = new List<float>(new float[intendedPos.ToArray().Length]);
+
+        List<PositionToDistance> posToDist = new List<PositionToDistance>(new PositionToDistance[intendedPos.ToArray().Length]);
+        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+            float smallestDist = float.MaxValue;
+            Vector3 destPos = intendedPos[i];
+            for(int j = 0;j < groupUnits.ToArray().Length;j++){
+                Vector3 unitPos = groupUnits[j].transform.position;
+                float distance = Vector3.Distance(unitPos,destPos);
+                if(distance < smallestDist){
+                        smallestDist = distance;
+                }
+            }
+            posToDist[i] = new PositionToDistance(){position = intendedPos[i], distance = smallestDist};
+        }
+
+        posToDist.Sort((x,y) => x.distance.CompareTo(y.distance));
+        posToDist.Reverse();
+
+        List<Vector3> properOrder = new List<Vector3>(new Vector3[intendedPos.ToArray().Length]);
+        List<int> indexesUsed = new List<int>();
+        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+            int shortestPathIndex = 0;
+            float smallestDist = float.MaxValue;
+            Vector3 destPos = posToDist[i].position;
+            for(int j = 0;j < groupUnits.ToArray().Length;j++){
+                if(!indexesUsed.Contains(j)){
+                    Vector3 unitPos = groupUnits[j].transform.position;
+                    float distance = Vector3.Distance(unitPos,destPos);
+                    if(distance < smallestDist){
+                        smallestDist = distance;
+                        shortestPathIndex = j;
+                    }
+                }
+            }
+            indexesUsed.Add(shortestPathIndex);
+            properOrder[i] = posToDist[shortestPathIndex].position;
+        }
+        return properOrder;
+    }
+
+    public List<Vector3> CalcIntendedPositions(Vector3 destPos)
+    {
+        List<Vector3> positions = new List<Vector3>();
+        Vector3 direction = (destPos - transform.position).normalized;
+        direction.y = 0;
+        int maxRows = (int)(groupUnits.ToArray().Length/unitProperties.defaultUnitFile);
+        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+            float rowNumber = (float)i/((float)unitProperties.defaultUnitFile);
+            float unfinishedRowNumber = (float)(i+1)/((float)unitProperties.defaultUnitFile);
+            int numberOfUnitsInLastRow =groupUnits.ToArray().Length - (int)(rowNumber)*unitProperties.defaultUnitFile;
+            Vector3 pos = destPos + new Vector3(-1/direction.x,0,1/direction.z).normalized*(unitSpacing*(i % unitProperties.defaultUnitFile));
+            pos = pos - direction * unitSpacing * (int)rowNumber;
+            pos = pos - new Vector3(-1/direction.x,0,1/direction.z).normalized* (Math.Clamp(groupUnits.ToArray().Length -1,0,unitProperties.defaultUnitFile)*unitSpacing/2);
+            if(unfinishedRowNumber > maxRows)
+                pos = pos + new Vector3(-1/direction.x,0,1/direction.z).normalized* (unitProperties.defaultUnitFile - numberOfUnitsInLastRow)*unitSpacing/2;
+            positions.Add(pos);
+        }
+        return positions;
     }
 
     public void UpdateCenterPosition(){
@@ -91,4 +141,10 @@ public class UnitGroup : MonoBehaviour
     }
 
     
+}
+
+class PositionToDistance{
+    public Vector3 position;
+    public float distance;
+
 }

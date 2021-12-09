@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Building : PlayerEntity
 {
+    public List<UnitProperties> trainableUnits = new List<UnitProperties>();
+
     // Start is called before the first frame update
     public override void Start()
     {
@@ -27,4 +29,10 @@ public class Building : PlayerEntity
     {
 
     }
+
+    public void TrainUnit(UnitProperties unitprops){
+
+    }
+
+
 }

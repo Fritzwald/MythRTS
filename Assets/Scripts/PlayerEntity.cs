@@ -4,7 +4,7 @@ using UnityEngine;
 
 public abstract class PlayerEntity : Entity
 {
-    public PlayerEnumerator.Players player;
+    
 
     
 

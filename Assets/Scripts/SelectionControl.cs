@@ -164,6 +164,22 @@ public class SelectionControl : MonoBehaviour
             
 		}
 
+		foreach(Entity ent in selectedEntites){
+			if(ent is PlayerEntity){
+				if(ent.player == HumanPlayer.Instance.playerID){
+					if(ent is Unit){
+
+					}
+					else if(ent is Building){
+
+					}
+				}
+				else{
+
+				}
+			}
+		}
+
 		return selectedEntites;
 		//print(selectedEntites.ToArray().Length);
 	        /*foreach(WorldEntity ent in selectedEntites){

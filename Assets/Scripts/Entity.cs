@@ -5,6 +5,7 @@ using cakeslice;
 
 public abstract class Entity : MonoBehaviour
 {
+    public PlayerEnumerator.Players player;
     public int currentHealth;
     public int maxHealth;
     public Vector3 worldPosition;
