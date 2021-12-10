@@ -42,15 +42,12 @@ public class SelectionControl : MonoBehaviour
 		else if (Input.GetKeyUp(KeyCode.Mouse0))
 		{
 			SelectedEntityManager.Instance.ClearSelection();
-            Entity mouseReleaseEntity = MouseReleaseSelect();
-			if(mouseReleaseEntity != null){
-				mouseReleaseEntity.OnSelect();
-			}
+            
 
 			if(boxEndPos != Vector2.zero && boxStartPos != Vector2.zero)
 			{
-				
-                foreach (Entity ent in SelectEntities()){
+				List<Entity> selectedEntites = SelectEntities();
+                foreach (Entity ent in selectedEntites){
 					ent.OnSelect();
 				}
 				
@@ -140,6 +137,10 @@ public class SelectionControl : MonoBehaviour
 		//print(overlapColliders.Length);
         List<Entity> selectedEntites = new List<Entity>();
 
+		Entity mouseReleaseEntity = MouseReleaseSelect();
+		if(mouseReleaseEntity != null)
+			selectedEntites.Add(mouseReleaseEntity);
+
         foreach(Collider obj in overlapColliders){
 			//print("Start: " + boxStartPos);
 			//print("End: " + boxEndPos);
@@ -164,27 +165,54 @@ public class SelectionControl : MonoBehaviour
             
 		}
 
-		foreach(Entity ent in selectedEntites){
-			if(ent is PlayerEntity){
-				if(ent.player == HumanPlayer.Instance.playerID){
-					if(ent is Unit){
+		if(selectedEntites.ToArray().Length > 0){
+			bool containsPlayerUnit = false;
+			bool containsPlayerBuilding = false;
+			bool containsOtherPlayerEntity = false;
 
+			foreach(Entity ent in selectedEntites){
+				if(ent is PlayerEntity){
+					if(ent.player == HumanPlayer.Instance.playerID){
+						if(ent is Unit){
+							containsPlayerUnit = true;
+						}
+						else if(ent is Building){
+							containsPlayerBuilding = true;
+						}
 					}
-					else if(ent is Building){
-
+					else{
+						containsOtherPlayerEntity = true;
 					}
 				}
-				else{
-
+			}
+			if(containsPlayerUnit){
+				for(int i = selectedEntites.ToArray().Length - 1; i >= 0; i--){
+					if(!(selectedEntites[i] is Unit)){
+						// selectedEntites.Remove(selectedEntites[i]);
+						selectedEntites.RemoveAt(i);
+					}
+				}
+			}
+			else if(containsPlayerBuilding){
+				for(int i = selectedEntites.ToArray().Length - 1; i >= 0; i--) {
+					if (!(selectedEntites[i] is Building)) {
+						selectedEntites.RemoveAt(i);
+					}
+				}
+			}
+			else if(containsOtherPlayerEntity){
+				for(int i = selectedEntites.ToArray().Length - 1; i >= 0; i--) {
+					if (selectedEntites[i].player != HumanPlayer.Instance.playerID) {
+						selectedEntites.RemoveAt(i);
+					}
 				}
 			}
 		}
-
+		print(selectedEntites.ToArray().Length);
 		return selectedEntites;
 		//print(selectedEntites.ToArray().Length);
 	        /*foreach(WorldEntity ent in selectedEntites){
             print(ent.currentHealth);
         }*/
-        
     }
 }

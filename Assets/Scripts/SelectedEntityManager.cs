@@ -19,21 +19,23 @@ public class SelectedEntityManager : MonoBehaviour
         foreach(UnitGroup group in selectedUnitGroups){
             group.ClearSelection();
         }
+        foreach(Entity ent in selectedEntities){
+            ent.Deselect();
+        }
         selectedEntities.Clear();
         selectedUnitGroups.Clear();
-
+        
     }
 
-    public void AddSelectedEntity(Entity ent){
+    public void AddSelected(Entity ent){
         if(!selectedEntities.Contains(ent))
             selectedEntities.Add(ent);
-        print("Selected Entities: " + selectedEntities.ToArray().Length);
     }
     
-    public void AddSelectedEntity(UnitGroup group){
+    public void AddSelected(UnitGroup group){
         if(!selectedUnitGroups.Contains(group))
             selectedUnitGroups.Add(group);
-        print("Selected Groups: " + selectedUnitGroups.ToArray().Length);
+        //print("Selected Groups: " + selectedUnitGroups.ToArray().Length);
     }
 
     public List<UnitGroup> GetSelectedUnitGroups(){

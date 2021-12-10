@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using cakeslice;
 
 public class Building : PlayerEntity
 {
@@ -33,6 +34,27 @@ public class Building : PlayerEntity
     public void TrainUnit(UnitProperties unitprops){
 
     }
+
+    public override void OnSelect()
+    {
+        base.OnSelect();
+        EnableHighlight();
+    }
+
+    public override void Deselect()
+    {
+        base.Deselect();
+        DisableHighlight();
+    }
+
+    public void EnableHighlight(){
+        gameObject.GetComponent<Outline>().EnableOutline();
+    }
+
+    public void DisableHighlight(){
+        gameObject.GetComponent<Outline>().DisableOutline();
+    }
+
 
 
 }

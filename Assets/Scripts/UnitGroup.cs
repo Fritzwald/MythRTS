@@ -17,6 +17,8 @@ public class UnitGroup : MonoBehaviour
     public UnitProperties unitProperties;
     public GameObject groupContainer;
 
+    public Vector3 unitDirection = Vector3.zero;
+
     public virtual void Start()
     {
         groupContainer = new GameObject("GroupContainer");
@@ -48,7 +50,7 @@ public class UnitGroup : MonoBehaviour
         foreach(Unit unit in groupUnits){
             unit.EnableHighlight();
         }
-        SelectedEntityManager.Instance.AddSelectedEntity(this);
+        SelectedEntityManager.Instance.AddSelected(this);
     }
 
     public void ClearSelection(){
@@ -59,14 +61,36 @@ public class UnitGroup : MonoBehaviour
 
     public void IssueMoveCommand(Vector3 destinationPos){
         List<Vector3> destPositions = CalcIntendedPositions(destinationPos);
-
+        Vector3 newDirection = (destinationPos - transform.position).normalized;
+        newDirection.y = 0;
         //this funciton needs work, something is wrong. how to find the most efficient unit pathing among the units?
         //List<Vector3> destPosWithOrder = FindPositionOrder(destPositions);
+        Quaternion directionAngle = Quaternion.FromToRotation(newDirection, unitDirection);
+        float directionEuler = directionAngle.eulerAngles.y;
+        //print(directionEuler);
+        if (directionEuler < 45 || directionEuler > 315) {
+            //go straight
+        } else if (directionEuler < 105) {
+            //go left
+        } else if (directionEuler < 255) {
+            groupUnits.Reverse();
+            
+            //go back
+            /*
+            if lastrow not full:
+
+            else:
+                backwards row order
+            */
+        } else {
+            //go right
+        }
 
         for(int i = 0;i < groupUnits.ToArray().Length;i++){
             //print(destPosWithOrder[i]);
             groupUnits[i].gameObject.GetComponent<NavMeshAgent>().SetDestination(destPositions[i]);
         }
+        unitDirection = newDirection;
     }
 
     public List<Vector3> FindPositionOrder(List<Vector3> intendedPos){
@@ -117,17 +141,39 @@ public class UnitGroup : MonoBehaviour
         List<Vector3> positions = new List<Vector3>();
         Vector3 direction = (destPos - transform.position).normalized;
         direction.y = 0;
+        print(direction);
         int maxRows = (int)(groupUnits.ToArray().Length/unitProperties.defaultUnitFile);
         for(int i = 0;i < groupUnits.ToArray().Length;i++){
             float rowNumber = (float)i/((float)unitProperties.defaultUnitFile);
             float unfinishedRowNumber = (float)(i+1)/((float)unitProperties.defaultUnitFile);
-            int numberOfUnitsInLastRow =groupUnits.ToArray().Length - (int)(rowNumber)*unitProperties.defaultUnitFile;
-            Vector3 pos = destPos + new Vector3(-1/direction.x,0,1/direction.z).normalized*(unitSpacing*(i % unitProperties.defaultUnitFile));
-            pos = pos - direction * unitSpacing * (int)rowNumber;
-            pos = pos - new Vector3(-1/direction.x,0,1/direction.z).normalized* (Math.Clamp(groupUnits.ToArray().Length -1,0,unitProperties.defaultUnitFile)*unitSpacing/2);
-            if(unfinishedRowNumber > maxRows)
-                pos = pos + new Vector3(-1/direction.x,0,1/direction.z).normalized* (unitProperties.defaultUnitFile - numberOfUnitsInLastRow)*unitSpacing/2;
-            positions.Add(pos);
+            int numberOfUnitsInLastRow = groupUnits.ToArray().Length - (int)(rowNumber)*unitProperties.defaultUnitFile;
+            Vector3 posSideOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(unitSpacing*(i % unitProperties.defaultUnitFile));
+            Vector3 posRowOffset = direction * unitSpacing * (int)rowNumber;
+            Vector3 posCenterOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(Math.Clamp(groupUnits.ToArray().Length-1,0,unitProperties.defaultUnitFile-1)*unitSpacing/2);
+            Vector3 posUnevenOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized* (unitProperties.defaultUnitFile - numberOfUnitsInLastRow)*unitSpacing/2;
+            if((direction.z >= 0 && direction.x >= 0) || (direction.z < 0 && direction.x < 0)){
+                // Offset to the sides
+                Vector3 pos = destPos + posSideOffset;
+                // Offset by row
+                pos = pos - posRowOffset;
+                // To center
+                pos = pos - posCenterOffset;
+                if(unfinishedRowNumber > maxRows)
+                    pos = pos + posUnevenOffset;
+                positions.Add(pos);
+            }
+            else{
+                // Offset to the sides
+                Vector3 pos = destPos - posSideOffset;
+                // Offset by row
+                pos = pos - posRowOffset;;
+                // To center
+                pos = pos + posCenterOffset;
+                if(unfinishedRowNumber > maxRows)
+                    pos = pos - posUnevenOffset;
+                positions.Add(pos);
+            }
+            
         }
         return positions;
     }

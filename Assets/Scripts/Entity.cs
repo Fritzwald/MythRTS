@@ -31,6 +31,10 @@ public abstract class Entity : MonoBehaviour
 
     public virtual void OnSelect()
     {
+        SelectedEntityManager.Instance.AddSelected(this);
+    }
+
+    public virtual void Deselect(){
 
     }
 
