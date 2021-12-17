@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using cakeslice;
+
 
 public class Unit : PlayerEntity
 {
@@ -35,14 +35,6 @@ public class Unit : PlayerEntity
     {
         base.OnSelect();
         unitGroup.SelectGroup();
-    }
-
-    public void EnableHighlight(){
-        gameObject.GetComponent<Outline>().EnableOutline();
-    }
-
-    public void DisableHighlight(){
-        gameObject.GetComponent<Outline>().DisableOutline();
     }
 
 }

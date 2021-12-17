@@ -14,5 +14,6 @@ public class UnitProperties : ScriptableObject
     public int defaultUnitFile;
     public GameObject unitGroupPrefab;
     public GameObject unitPrefab;
-    public GameObject unitIcon;
+    public Sprite unitIcon;
+    // public List<Stance> unitStances;
 }

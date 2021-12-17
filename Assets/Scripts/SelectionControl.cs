@@ -15,6 +15,8 @@ public class SelectionControl : MonoBehaviour
 
     public LayerMask selectableLayer;
 
+	private bool overUI = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -27,38 +29,40 @@ public class SelectionControl : MonoBehaviour
         if (Input.GetKey(KeyCode.Mouse0))
 		{
 
-			SelectionBox();
-
 			if(Input.GetKeyDown(KeyCode.Mouse0))
 			{
+				overUI = MouseInputUIBlocker.Instance.BlockedByUI;
 				boxStartPos = Input.mousePosition;
 			}
 			else
 			{
 				boxEndPos = Input.mousePosition;
 			}
-
+			if(!overUI) {
+				SelectionBox();
+			}
 		}
 		else if (Input.GetKeyUp(KeyCode.Mouse0))
 		{
-			SelectedEntityManager.Instance.ClearSelection();
-            
-
-			if(boxEndPos != Vector2.zero && boxStartPos != Vector2.zero)
-			{
-				List<Entity> selectedEntites = SelectEntities();
-                foreach (Entity ent in selectedEntites){
-					ent.OnSelect();
-				}
+			if (!overUI) {
+				SelectedEntityManager.Instance.ClearSelection();
 				
-				// Deselect first
-				//Deselect();
-				// New Selection Box
-				//Selection();
-				// Reset UI
-				ResetSelectUI();
+				if(boxEndPos != Vector2.zero && boxStartPos != Vector2.zero)
+				{
+					List<Entity> selectedEntites = SelectEntities();
+					for (int i = 0; i < selectedEntites.Count; i++) {
+						selectedEntites[i].OnSelect();
+					}
+					
+					// Deselect first
+					//Deselect();
+					// New Selection Box
+					//Selection();
+					// Reset UI
+					ResetSelectUI();
+				}
+				boxEndPos = boxStartPos = Vector2.zero;
 			}
-			boxEndPos = boxStartPos = Vector2.zero;
 		}
     }
 
@@ -141,26 +145,26 @@ public class SelectionControl : MonoBehaviour
 		if(mouseReleaseEntity != null)
 			selectedEntites.Add(mouseReleaseEntity);
 
-        foreach(Collider obj in overlapColliders){
+		for (int i = 0; i < overlapColliders.Length; i++) {
 			//print("Start: " + boxStartPos);
 			//print("End: " + boxEndPos);
-			Vector3 objScreenLoc = Camera.main.WorldToScreenPoint(obj.transform.position);
+			Vector3 objScreenLoc = Camera.main.WorldToScreenPoint(overlapColliders[i].transform.position);
             //print("ObjPos: " + objScreenLoc);
 			if (boxStartPos.x < objScreenLoc.x && objScreenLoc.x < boxEndPos.x && boxStartPos.y < objScreenLoc.y && objScreenLoc.y < boxEndPos.y)
 			{
-				selectedEntites.Add(obj.gameObject.GetComponent<Entity>());
+				selectedEntites.Add(overlapColliders[i].gameObject.GetComponent<Entity>());
 			}
 			else if (boxStartPos.x < objScreenLoc.x && objScreenLoc.x < boxEndPos.x && boxStartPos.y > objScreenLoc.y && objScreenLoc.y > boxEndPos.y)
 			{
-				selectedEntites.Add(obj.gameObject.GetComponent<Entity>());
+				selectedEntites.Add(overlapColliders[i].gameObject.GetComponent<Entity>());
 			}
 			else if (boxStartPos.x > objScreenLoc.x && objScreenLoc.x > boxEndPos.x && boxStartPos.y > objScreenLoc.y && objScreenLoc.y > boxEndPos.y)
 			{
-				selectedEntites.Add(obj.gameObject.GetComponent<Entity>());
+				selectedEntites.Add(overlapColliders[i].gameObject.GetComponent<Entity>());
 			}
 			else if (boxStartPos.x > objScreenLoc.x && objScreenLoc.x > boxEndPos.x && boxStartPos.y < objScreenLoc.y && objScreenLoc.y < boxEndPos.y)
 			{
-				selectedEntites.Add(obj.gameObject.GetComponent<Entity>());
+				selectedEntites.Add(overlapColliders[i].gameObject.GetComponent<Entity>());
 			}
             
 		}
@@ -170,13 +174,13 @@ public class SelectionControl : MonoBehaviour
 			bool containsPlayerBuilding = false;
 			bool containsOtherPlayerEntity = false;
 
-			foreach(Entity ent in selectedEntites){
-				if(ent is PlayerEntity){
-					if(ent.player == HumanPlayer.Instance.playerID){
-						if(ent is Unit){
+			for (int i = 0; i < selectedEntites.Count; i++) {
+				if(selectedEntites[i] is PlayerEntity){
+					if(selectedEntites[i].player == HumanPlayer.Instance.playerID){
+						if(selectedEntites[i] is Unit){
 							containsPlayerUnit = true;
 						}
-						else if(ent is Building){
+						else if(selectedEntites[i] is Building){
 							containsPlayerBuilding = true;
 						}
 					}
@@ -186,6 +190,7 @@ public class SelectionControl : MonoBehaviour
 				}
 			}
 			if(containsPlayerUnit){
+				SelectedEntityManager.Instance.selectionType = SelectedEntityManager.selectionTypes.Unit;
 				for(int i = selectedEntites.ToArray().Length - 1; i >= 0; i--){
 					if(!(selectedEntites[i] is Unit)){
 						// selectedEntites.Remove(selectedEntites[i]);
@@ -194,6 +199,7 @@ public class SelectionControl : MonoBehaviour
 				}
 			}
 			else if(containsPlayerBuilding){
+				SelectedEntityManager.Instance.selectionType = SelectedEntityManager.selectionTypes.Building;
 				for(int i = selectedEntites.ToArray().Length - 1; i >= 0; i--) {
 					if (!(selectedEntites[i] is Building)) {
 						selectedEntites.RemoveAt(i);
@@ -201,6 +207,7 @@ public class SelectionControl : MonoBehaviour
 				}
 			}
 			else if(containsOtherPlayerEntity){
+				SelectedEntityManager.Instance.selectionType = SelectedEntityManager.selectionTypes.OtherPlayer;
 				for(int i = selectedEntites.ToArray().Length - 1; i >= 0; i--) {
 					if (selectedEntites[i].player != HumanPlayer.Instance.playerID) {
 						selectedEntites.RemoveAt(i);
@@ -208,7 +215,7 @@ public class SelectionControl : MonoBehaviour
 				}
 			}
 		}
-		print(selectedEntites.ToArray().Length);
+		//print(selectedEntites.ToArray().Length);
 		return selectedEntites;
 		//print(selectedEntites.ToArray().Length);
 	        /*foreach(WorldEntity ent in selectedEntites){

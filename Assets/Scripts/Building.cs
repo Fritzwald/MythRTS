@@ -6,6 +6,9 @@ using cakeslice;
 public class Building : PlayerEntity
 {
     public List<UnitProperties> trainableUnits = new List<UnitProperties>();
+    public Vector3 unitSpawnLocation = Vector3.zero;
+
+    public BuildingProperties buildingProperties;
 
     // Start is called before the first frame update
     public override void Start()
@@ -13,12 +16,13 @@ public class Building : PlayerEntity
         
     }
 
-    public virtual void AssignBuildingState(PlayerEnumerator.Players playerID, Vector3 startPosition, int startHealth, int startMaxHealth)
+    public virtual void AssignBuildingState(PlayerEnumerator.Players playerID, BuildingProperties properties, Vector3 startPosition, int startHealth, int startMaxHealth)
     {
-        maxHealth = startMaxHealth;
-        currentHealth = startHealth;
-        worldPosition = startPosition;
         player = playerID;
+        buildingProperties = properties;
+        worldPosition = startPosition;
+        currentHealth = startHealth;
+        maxHealth = startMaxHealth;
     }
 
     public override void OnDestroyed()
@@ -32,6 +36,8 @@ public class Building : PlayerEntity
     }
 
     public void TrainUnit(UnitProperties unitprops){
+        print(unitprops.unitName);
+        GameObject newGroup = Instantiate(unitprops.unitGroupPrefab);
 
     }
 
@@ -45,14 +51,6 @@ public class Building : PlayerEntity
     {
         base.Deselect();
         DisableHighlight();
-    }
-
-    public void EnableHighlight(){
-        gameObject.GetComponent<Outline>().EnableOutline();
-    }
-
-    public void DisableHighlight(){
-        gameObject.GetComponent<Outline>().DisableOutline();
     }
 
 

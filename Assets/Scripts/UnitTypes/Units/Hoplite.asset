@@ -23,4 +23,4 @@ MonoBehaviour:
   unitGroupPrefab: {fileID: 3083048018538631740, guid: 6742d77c4aae79a438c0ba8c9b245aee,
     type: 3}
   unitPrefab: {fileID: 0}
-  unitIcon: {fileID: 0}
+  unitIcon: {fileID: 21300000, guid: ce007dc58c7d0184995189034ac5a211, type: 3}
