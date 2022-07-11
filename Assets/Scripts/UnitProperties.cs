@@ -11,7 +11,9 @@ public class UnitProperties : ScriptableObject
     public float movementSpeed;
     public float attackSpeed;
     public float unitRadius;
-    public int defaultUnitFile;
+    public int groupDefaultUnitWidth;
+    public int unitCreationDelay;
+    public int groupMaxUnits;
     public GameObject unitGroupPrefab;
     public GameObject unitPrefab;
     public Sprite unitIcon;

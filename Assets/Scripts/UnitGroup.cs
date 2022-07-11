@@ -19,15 +19,47 @@ public class UnitGroup : MonoBehaviour
 
     public Vector3 unitDirection = Vector3.zero;
 
-    public virtual void Start()
+
+    public virtual void Awake()
     {
         groupContainer = new GameObject("GroupContainer");
         groupContainer.transform.position = Vector3.zero;
         this.transform.parent = groupContainer.transform;
+        
+    }
+
+    public virtual void Start() {
+        AdoptUnitProperties(unitProperties);
+    }
+
+    private void AdoptUnitProperties(UnitProperties props){
+        unitSpacing = props.unitRadius * 2;
+        maxUnitCount = props.groupMaxUnits;
+        // TODO Add Health
     }
 
     public virtual void Update() {
         
+    }
+
+    public void CreateUnits (Vector3[] startPositions, int delay = 0){
+        StartCoroutine(CreateUnitsCoroutine(startPositions, delay));
+    }
+
+    private IEnumerator CreateUnitsCoroutine(Vector3[] startPositions, int delay){
+        for (int i = 0; i < startPositions.Length; i++ ){
+            CreateUnit(startPositions[i]);
+            yield return new WaitForSeconds(delay);
+        }
+    }
+
+    private void CreateUnit(Vector3 position)
+    {
+        GameObject newUnit = Instantiate(unitProperties.unitPrefab, position, Quaternion.identity, groupContainer.transform);
+        Unit newUnitScript = newUnit.GetComponent<Unit>();
+        newUnitScript.unitGroup = this;
+        groupUnits.Add(newUnitScript);
+        currentUnitCount ++;
     }
 
     public void AssignUnitProperties(UnitProperties unitProps, Vector3 createPosition)
@@ -35,15 +67,6 @@ public class UnitGroup : MonoBehaviour
         transform.position = createPosition;
         unitProperties = unitProps;
         
-    }
-
-
-
-    public Unit CreateUnit<type>(Vector3 position) where type : Unit
-    {
-        GameObject newUnit = Instantiate(unitProperties.unitPrefab, position, Quaternion.identity, groupContainer.transform);
-        Unit unitScript = newUnit.AddComponent<type>();
-        return unitScript;
     }
 
     public void SelectGroup(){
@@ -142,15 +165,18 @@ public class UnitGroup : MonoBehaviour
         Vector3 direction = (destPos - transform.position).normalized;
         direction.y = 0;
         print(direction);
-        int maxRows = (int)(groupUnits.ToArray().Length/unitProperties.defaultUnitFile);
+        int maxRows = (int)(groupUnits.ToArray().Length/unitProperties.groupDefaultUnitWidth);
         for(int i = 0;i < groupUnits.ToArray().Length;i++){
-            float rowNumber = (float)i/((float)unitProperties.defaultUnitFile);
-            float unfinishedRowNumber = (float)(i+1)/((float)unitProperties.defaultUnitFile);
-            int numberOfUnitsInLastRow = groupUnits.ToArray().Length - (int)(rowNumber)*unitProperties.defaultUnitFile;
-            Vector3 posSideOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(unitSpacing*(i % unitProperties.defaultUnitFile));
+            float rowNumber = (float)i/((float)unitProperties.groupDefaultUnitWidth);
+            float unfinishedRowNumber = (float)(i+1)/((float)unitProperties.groupDefaultUnitWidth);
+            int numberOfUnitsInLastRow = groupUnits.ToArray().Length - (int)(rowNumber)*unitProperties.groupDefaultUnitWidth;
+            Vector3 posSideOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(unitSpacing*(i % unitProperties.groupDefaultUnitWidth));
             Vector3 posRowOffset = direction * unitSpacing * (int)rowNumber;
-            Vector3 posCenterOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(Math.Clamp(groupUnits.ToArray().Length-1,0,unitProperties.defaultUnitFile-1)*unitSpacing/2);
-            Vector3 posUnevenOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized* (unitProperties.defaultUnitFile - numberOfUnitsInLastRow)*unitSpacing/2;
+            // Centers rows
+            Vector3 posCenterOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(Math.Clamp(groupUnits.ToArray().Length-1,0,unitProperties.groupDefaultUnitWidth-1)*unitSpacing/2);
+            // Position units in last uneven row
+            Vector3 posUnevenOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(unitProperties.groupDefaultUnitWidth - numberOfUnitsInLastRow)*unitSpacing/2;
+            print(posUnevenOffset);
             if((direction.z >= 0 && direction.x >= 0) || (direction.z < 0 && direction.x < 0)){
                 // Offset to the sides
                 Vector3 pos = destPos + posSideOffset;
@@ -158,7 +184,7 @@ public class UnitGroup : MonoBehaviour
                 pos = pos - posRowOffset;
                 // To center
                 pos = pos - posCenterOffset;
-                if(unfinishedRowNumber > maxRows)
+                if(unfinishedRowNumber > maxRows && maxRows > 0)
                     pos = pos + posUnevenOffset;
                 positions.Add(pos);
             }
@@ -169,7 +195,7 @@ public class UnitGroup : MonoBehaviour
                 pos = pos - posRowOffset;;
                 // To center
                 pos = pos + posCenterOffset;
-                if(unfinishedRowNumber > maxRows)
+                if(unfinishedRowNumber > maxRows && maxRows > 0)
                     pos = pos - posUnevenOffset;
                 positions.Add(pos);
             }
@@ -180,10 +206,15 @@ public class UnitGroup : MonoBehaviour
 
     public void UpdateCenterPosition(){
         Vector3 sumOfPositions = Vector3.zero;
-        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+        for(int i = 0;i < groupUnits.Count;i++){
             sumOfPositions += groupUnits[i].transform.position;
         }
-        transform.position = sumOfPositions / groupUnits.ToArray().Length;
+
+        if (groupUnits.Count == 0) 
+            transform.position = sumOfPositions;
+        else
+            transform.position = sumOfPositions / groupUnits.Count;
+
     }
 
     

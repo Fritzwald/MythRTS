@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using cakeslice;
+using System;
 
 public class Building : PlayerEntity
 {
@@ -38,7 +39,11 @@ public class Building : PlayerEntity
     public void TrainUnit(UnitProperties unitprops){
         print(unitprops.unitName);
         GameObject newGroup = Instantiate(unitprops.unitGroupPrefab);
-
+        UnitGroup newGroupScript = newGroup.GetComponent<UnitGroup>();
+        newGroupScript.unitProperties = unitprops;
+        Vector3[] startPosArray = new Vector3[4];
+        Array.Fill(startPosArray, new Vector3(transform.position.x, 1, transform.position.z - 3));
+        newGroupScript.CreateUnits(startPosArray, unitprops.unitCreationDelay);
     }
 
     public override void OnSelect()
