@@ -6,7 +6,7 @@ public class CameraControl : MonoBehaviour
 {
 	public GameObject mainCamera;
     public float cameraVelocity = 5;
-    public Vector3 panBounds = new Vector3(30, 0, 30);
+    public Vector2 panBounds = Vector2.zero;
 
     public float rotateVelocity = 5;
 
@@ -70,11 +70,11 @@ public class CameraControl : MonoBehaviour
 		{
 			transform.position += -transform.right*cameraVelocity*Time.deltaTime;
 		}
-		if (transform.position.z < panBounds.z &&(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) || Input.mousePosition.y > screenHeight*0.99f - intBoundary))
+		if (transform.position.z < panBounds.y &&(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) || Input.mousePosition.y > screenHeight*0.99f - intBoundary))
 		{
 			transform.position += transform.forward*cameraVelocity*Time.deltaTime;
 		}
-		if (transform.position.z > -panBounds.z &&(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) || Input.mousePosition.y < screenHeight*0.01f + intBoundary))
+		if (transform.position.z > -panBounds.y &&(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) || Input.mousePosition.y < screenHeight*0.01f + intBoundary))
 		{
 			transform.position += -transform.forward*cameraVelocity*Time.deltaTime;
 		}

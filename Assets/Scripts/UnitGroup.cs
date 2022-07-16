@@ -90,10 +90,10 @@ public class UnitGroup : MonoBehaviour
         }
     }
 
-    public void IssueMoveCommand(Vector3 destinationPos){
-        Vector3 direction = (destinationPos - transform.position).normalized;
-        intendedUnitPositions = CalcIntendedPositions(destinationPos, direction);
+    public void IssueMoveCommand(Vector3 destinationPos, bool useDir = false, Vector3 dir = new Vector3()){
+        Vector3 direction = useDir ? dir : (destinationPos - transform.position).normalized;
         direction.y = 0;
+        intendedUnitPositions = CalcIntendedPositions(destinationPos, direction);
         //this funciton needs work, something is wrong. how to find the most efficient unit pathing among the units?
         // This might be okay now
         //List<Vector3> destPosWithOrder = FindPositionOrder(intendedUnitPositions);

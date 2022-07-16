@@ -7,7 +7,7 @@ public class SelectionControl : MonoBehaviour
 {
     public Image selectImage;
     private Vector2 boxStartPos = Vector2.zero;
-	private Vector2 boxEndPos = Vector2.zero;
+	  private Vector2 boxEndPos = Vector2.zero;
 
     public float boxLength = 100;
 
@@ -15,7 +15,7 @@ public class SelectionControl : MonoBehaviour
 
     public LayerMask selectableLayer;
 
-	private bool overUI = false;
+	  private bool overUI = false;
 
     // Start is called before the first frame update
     void Start()
@@ -109,9 +109,9 @@ public class SelectionControl : MonoBehaviour
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        if(Physics.Raycast(ray, out hit, 100, selectableLayer)){
+    if(Physics.Raycast(ray, out hit, 100, selectableLayer)){
 			if(hit.collider.GetComponent<Entity>())
-            	return hit.collider.GetComponent<Entity>();
+        return hit.collider.GetComponent<Entity>();
 			else
 				return null;
         }
