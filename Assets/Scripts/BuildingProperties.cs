@@ -10,7 +10,8 @@ public class BuildingProperties : ScriptableObject
     public int attackDamage;
     public int range;
     public float attackSpeed;
+    public Vector3 defaultRallyOffset;
     public GameObject buildingPrefab;
-    public Texture2D buildingIcon;
-    public List<UnitProperties> trainableUnits;
+    public Sprite buildingIcon;
+    public UnitProperties[] trainableUnits;
 }

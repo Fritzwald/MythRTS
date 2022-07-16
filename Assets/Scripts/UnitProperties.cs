@@ -12,10 +12,13 @@ public class UnitProperties : ScriptableObject
     public float attackSpeed;
     public float unitRadius;
     public int groupDefaultUnitWidth;
-    public int unitCreationDelay;
+    public float unitCreationDelay;
     public int groupMaxUnits;
     public GameObject unitGroupPrefab;
     public GameObject unitPrefab;
     public Sprite unitIcon;
+    public BuildingProperties[] buildings;
+    public UnitAbilities[] abilities;
+    public UnitFormations[] formations;
     // public List<Stance> unitStances;
 }

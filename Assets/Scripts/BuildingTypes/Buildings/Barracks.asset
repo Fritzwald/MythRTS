@@ -12,12 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 18919f708bfc97f4bb531475f8db0ab2, type: 3}
   m_Name: Barracks
   m_EditorClassIdentifier: 
-  buildingName: Barracks
-  maxHealth: 1000
+  buildingName: 
+  maxHealth: 0
   attackDamage: 0
   range: 0
   attackSpeed: 0
-  buildingPrefab: {fileID: 0}
-  buildingIcon: {fileID: 2800000, guid: af0765c0b9ca80f489c584306162b2e7, type: 3}
-  buildableUnits:
+  defaultRallyOffset: {x: 0, y: 0, z: -7}
+  buildingPrefab: {fileID: 7086754130036235220, guid: 5362b29a7dd8c474b888e6d1cd3bd357,
+    type: 3}
+  buildingIcon: {fileID: 21300000, guid: af0765c0b9ca80f489c584306162b2e7, type: 3}
+  trainableUnits:
+  - {fileID: 11400000, guid: 134a89277aaacdd478863e6d407dc4aa, type: 2}
   - {fileID: 11400000, guid: ac38948d6cb8d5f41b7f72756edc0f8d, type: 2}

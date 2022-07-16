@@ -18,7 +18,7 @@ public class SpearmanGroup : UnitGroup
     }
 
     public override void Update(){
-        UpdateCenterPosition();
+        base.Update();
     }
 
     

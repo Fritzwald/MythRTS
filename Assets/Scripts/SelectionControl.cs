@@ -32,13 +32,16 @@ public class SelectionControl : MonoBehaviour
 			if(Input.GetKeyDown(KeyCode.Mouse0))
 			{
 				overUI = MouseInputUIBlocker.Instance.BlockedByUI;
-				boxStartPos = Input.mousePosition;
+				if(!overUI)
+					boxStartPos = Input.mousePosition;
 			}
 			else
 			{
-				boxEndPos = Input.mousePosition;
+				if(!overUI)
+					boxEndPos = Input.mousePosition;
 			}
 			if(!overUI) {
+				
 				SelectionBox();
 			}
 		}

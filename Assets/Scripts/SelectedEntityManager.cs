@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class SelectedEntityManager : MonoBehaviour
 {
@@ -46,10 +47,10 @@ public class SelectedEntityManager : MonoBehaviour
     private void SelectionChange() {
         switch(selectionType){
             case selectionTypes.Unit:
-                //UIManager.Instance.RedrawMenu(selectedEntities)
+                UIManager.Instance.RedrawMenu(selectedUnitGroups);
             break;
             case selectionTypes.Building:
-                UIManager.Instance.RedrawMenu((Building)selectedEntities[0]);
+                UIManager.Instance.RedrawMenu(selectedEntities.Cast<Building>().ToList());
             break;
             case selectionTypes.OtherPlayer:
 

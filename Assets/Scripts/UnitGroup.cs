@@ -13,7 +13,7 @@ public class UnitGroup : MonoBehaviour
     public int currentTotalHealth;
     public float unitSpacing;
     public List<Unit> groupUnits = new List<Unit>();
-    public List<Vector3> intendedGroupPositions = new List<Vector3>();
+    public List<Vector3> intendedUnitPositions = new List<Vector3>();
     public UnitProperties unitProperties;
     public GameObject groupContainer;
 
@@ -25,28 +25,32 @@ public class UnitGroup : MonoBehaviour
         groupContainer = new GameObject("GroupContainer");
         groupContainer.transform.position = Vector3.zero;
         this.transform.parent = groupContainer.transform;
-        
+        currentUnitCount = groupUnits.Count;
     }
 
     public virtual void Start() {
-        AdoptUnitProperties(unitProperties);
+        
     }
 
-    private void AdoptUnitProperties(UnitProperties props){
+    public void AdoptUnitProperties(UnitProperties props){
         unitSpacing = props.unitRadius * 2;
         maxUnitCount = props.groupMaxUnits;
         // TODO Add Health
     }
 
     public virtual void Update() {
-        
+        UpdateCenterPosition();
     }
 
-    public void CreateUnits (Vector3[] startPositions, int delay = 0){
+    public void CreateUnits (Vector3[] startPositions, Vector3 pos, float delay = 0) {
+        currentUnitCount += startPositions.Length;
+        // Calc unit positions for rally points
+        Vector3 direction = (pos - startPositions[0]).normalized;
+        intendedUnitPositions = CalcIntendedPositions(pos, direction);
         StartCoroutine(CreateUnitsCoroutine(startPositions, delay));
     }
 
-    private IEnumerator CreateUnitsCoroutine(Vector3[] startPositions, int delay){
+    private IEnumerator CreateUnitsCoroutine(Vector3[] startPositions, float delay) {
         for (int i = 0; i < startPositions.Length; i++ ){
             CreateUnit(startPositions[i]);
             yield return new WaitForSeconds(delay);
@@ -59,7 +63,7 @@ public class UnitGroup : MonoBehaviour
         Unit newUnitScript = newUnit.GetComponent<Unit>();
         newUnitScript.unitGroup = this;
         groupUnits.Add(newUnitScript);
-        currentUnitCount ++;
+        IssueUnitMoveCommand(intendedUnitPositions[groupUnits.Count - 1], groupUnits.Count - 1); 
     }
 
     public void AssignUnitProperties(UnitProperties unitProps, Vector3 createPosition)
@@ -83,16 +87,18 @@ public class UnitGroup : MonoBehaviour
     }
 
     public void IssueMoveCommand(Vector3 destinationPos){
-        List<Vector3> destPositions = CalcIntendedPositions(destinationPos);
-        Vector3 newDirection = (destinationPos - transform.position).normalized;
-        newDirection.y = 0;
+        Vector3 direction = (destinationPos - transform.position).normalized;
+        intendedUnitPositions = CalcIntendedPositions(destinationPos, direction);
+        direction.y = 0;
         //this funciton needs work, something is wrong. how to find the most efficient unit pathing among the units?
-        //List<Vector3> destPosWithOrder = FindPositionOrder(destPositions);
-        Quaternion directionAngle = Quaternion.FromToRotation(newDirection, unitDirection);
+        // This might be okay now
+        //List<Vector3> destPosWithOrder = FindPositionOrder(intendedUnitPositions);
+        Quaternion directionAngle = Quaternion.FromToRotation(direction, unitDirection);
         float directionEuler = directionAngle.eulerAngles.y;
         //print(directionEuler);
         if (directionEuler < 45 || directionEuler > 315) {
             //go straight
+            
         } else if (directionEuler < 105) {
             //go left
         } else if (directionEuler < 255) {
@@ -109,22 +115,26 @@ public class UnitGroup : MonoBehaviour
             //go right
         }
 
-        for(int i = 0;i < groupUnits.ToArray().Length;i++){
-            //print(destPosWithOrder[i]);
-            groupUnits[i].gameObject.GetComponent<NavMeshAgent>().SetDestination(destPositions[i]);
+        for(int i = 0;i < groupUnits.Count;i++){
+            //groupUnits[i].gameObject.GetComponent<NavMeshAgent>().SetDestination(intendedUnitPositions[i]);
+            IssueUnitMoveCommand(intendedUnitPositions[i], i);
         }
-        unitDirection = newDirection;
+        unitDirection = direction;
+    }
+
+    private void IssueUnitMoveCommand(Vector3 pos, int unitIndex) {
+        groupUnits[unitIndex].gameObject.GetComponent<NavMeshAgent>().SetDestination(pos);
     }
 
     public List<Vector3> FindPositionOrder(List<Vector3> intendedPos){
         //List<Vector3> orderedPositions = new List<Vector3>(new Vector3[intendedPos.ToArray().Length]);
         //List<float> distances = new List<float>(new float[intendedPos.ToArray().Length]);
 
-        List<PositionToDistance> posToDist = new List<PositionToDistance>(new PositionToDistance[intendedPos.ToArray().Length]);
-        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+        List<PositionToDistance> posToDist = new List<PositionToDistance>(new PositionToDistance[intendedPos.Count]);
+        for(int i = 0;i < currentUnitCount;i++){
             float smallestDist = float.MaxValue;
             Vector3 destPos = intendedPos[i];
-            for(int j = 0;j < groupUnits.ToArray().Length;j++){
+            for(int j = 0;j < currentUnitCount;j++){
                 Vector3 unitPos = groupUnits[j].transform.position;
                 float distance = Vector3.Distance(unitPos,destPos);
                 if(distance < smallestDist){
@@ -137,13 +147,13 @@ public class UnitGroup : MonoBehaviour
         posToDist.Sort((x,y) => x.distance.CompareTo(y.distance));
         posToDist.Reverse();
 
-        List<Vector3> properOrder = new List<Vector3>(new Vector3[intendedPos.ToArray().Length]);
+        List<Vector3> properOrder = new List<Vector3>(new Vector3[intendedPos.Count]);
         List<int> indexesUsed = new List<int>();
-        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+        for(int i = 0;i < currentUnitCount;i++){
             int shortestPathIndex = 0;
             float smallestDist = float.MaxValue;
             Vector3 destPos = posToDist[i].position;
-            for(int j = 0;j < groupUnits.ToArray().Length;j++){
+            for(int j = 0;j < currentUnitCount;j++){
                 if(!indexesUsed.Contains(j)){
                     Vector3 unitPos = groupUnits[j].transform.position;
                     float distance = Vector3.Distance(unitPos,destPos);
@@ -159,24 +169,25 @@ public class UnitGroup : MonoBehaviour
         return properOrder;
     }
 
-    public List<Vector3> CalcIntendedPositions(Vector3 destPos)
+    public List<Vector3> CalcIntendedPositions(Vector3 destPos, Vector3 direction)
     {
         List<Vector3> positions = new List<Vector3>();
-        Vector3 direction = (destPos - transform.position).normalized;
         direction.y = 0;
-        print(direction);
-        int maxRows = (int)(groupUnits.ToArray().Length/unitProperties.groupDefaultUnitWidth);
-        for(int i = 0;i < groupUnits.ToArray().Length;i++){
+        int maxRows = (int)(currentUnitCount/unitProperties.groupDefaultUnitWidth);
+        for(int i = 0;i < currentUnitCount;i++){
             float rowNumber = (float)i/((float)unitProperties.groupDefaultUnitWidth);
             float unfinishedRowNumber = (float)(i+1)/((float)unitProperties.groupDefaultUnitWidth);
-            int numberOfUnitsInLastRow = groupUnits.ToArray().Length - (int)(rowNumber)*unitProperties.groupDefaultUnitWidth;
-            Vector3 posSideOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(unitSpacing*(i % unitProperties.groupDefaultUnitWidth));
+            int numberOfUnitsInLastRow = currentUnitCount - (int)(rowNumber)*unitProperties.groupDefaultUnitWidth;
+            Vector3 perpendicularDirection = new Vector3((direction.x == 0 ? (direction.z > 0 ? 10000000 : -10000000) : -1/direction.x), 0, 1/direction.z).normalized;
+            //possible cleaner alternative: must consider rotational direction, and unit position swapping
+            //Vector3 perpendicularDirection = new Vector3(-direction.z , 0, direction.x).normalized;
+            Vector3 posSideOffset = perpendicularDirection*(unitSpacing*(i % unitProperties.groupDefaultUnitWidth));
             Vector3 posRowOffset = direction * unitSpacing * (int)rowNumber;
             // Centers rows
-            Vector3 posCenterOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(Math.Clamp(groupUnits.ToArray().Length-1,0,unitProperties.groupDefaultUnitWidth-1)*unitSpacing/2);
+            Vector3 posCenterOffset = perpendicularDirection*(Math.Clamp(currentUnitCount-1,0,unitProperties.groupDefaultUnitWidth-1)*unitSpacing/2);
             // Position units in last uneven row
-            Vector3 posUnevenOffset = new Vector3(-1/direction.x,0,1/direction.z).normalized*(unitProperties.groupDefaultUnitWidth - numberOfUnitsInLastRow)*unitSpacing/2;
-            print(posUnevenOffset);
+            Vector3 posUnevenOffset = perpendicularDirection*(unitProperties.groupDefaultUnitWidth - numberOfUnitsInLastRow)*unitSpacing/2;
+            //print(posUnevenOffset);
             if((direction.z >= 0 && direction.x >= 0) || (direction.z < 0 && direction.x < 0)){
                 // Offset to the sides
                 Vector3 pos = destPos + posSideOffset;
@@ -186,6 +197,7 @@ public class UnitGroup : MonoBehaviour
                 pos = pos - posCenterOffset;
                 if(unfinishedRowNumber > maxRows && maxRows > 0)
                     pos = pos + posUnevenOffset;
+                //print("Position: " + pos);
                 positions.Add(pos);
             }
             else{
@@ -197,6 +209,7 @@ public class UnitGroup : MonoBehaviour
                 pos = pos + posCenterOffset;
                 if(unfinishedRowNumber > maxRows && maxRows > 0)
                     pos = pos - posUnevenOffset;
+                //print("Position: " + pos);
                 positions.Add(pos);
             }
             
