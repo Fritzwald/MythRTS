@@ -6,9 +6,6 @@ using cakeslice;
 public abstract class PlayerEntity : Entity
 {
     
-
-    
-
     public abstract override void OnDestroyed();
 
     public abstract override void OnCreated();

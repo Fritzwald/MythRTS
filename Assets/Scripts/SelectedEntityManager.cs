@@ -38,6 +38,7 @@ public class SelectedEntityManager : MonoBehaviour
     
     public void AddSelected(UnitGroup group){
         if(!selectedUnitGroups.Contains(group)){
+            group.selected = true;
             selectedUnitGroups.Add(group);
             SelectionChange();
         }

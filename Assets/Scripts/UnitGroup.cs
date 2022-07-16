@@ -12,6 +12,7 @@ public class UnitGroup : MonoBehaviour
     public int maxTotalHealth;
     public int currentTotalHealth;
     public float unitSpacing;
+    public bool selected = false;
     public List<Unit> groupUnits = new List<Unit>();
     public List<Vector3> intendedUnitPositions = new List<Vector3>();
     public UnitProperties unitProperties;
@@ -62,6 +63,9 @@ public class UnitGroup : MonoBehaviour
         GameObject newUnit = Instantiate(unitProperties.unitPrefab, position, Quaternion.identity, groupContainer.transform);
         Unit newUnitScript = newUnit.GetComponent<Unit>();
         newUnitScript.unitGroup = this;
+        // Why doesnt this work simon???? ===============
+        if (selected) newUnitScript.EnableHighlight();
+        // ==============================================
         groupUnits.Add(newUnitScript);
         IssueUnitMoveCommand(intendedUnitPositions[groupUnits.Count - 1], groupUnits.Count - 1); 
     }
@@ -126,7 +130,8 @@ public class UnitGroup : MonoBehaviour
         groupUnits[unitIndex].gameObject.GetComponent<NavMeshAgent>().SetDestination(pos);
     }
 
-    public List<Vector3> FindPositionOrder(List<Vector3> intendedPos){
+    // Not currently used in favour of reversing unit order in certain situations
+    /* public List<Vector3> FindPositionOrder(List<Vector3> intendedPos){
         //List<Vector3> orderedPositions = new List<Vector3>(new Vector3[intendedPos.ToArray().Length]);
         //List<float> distances = new List<float>(new float[intendedPos.ToArray().Length]);
 
@@ -167,7 +172,7 @@ public class UnitGroup : MonoBehaviour
             properOrder[i] = posToDist[shortestPathIndex].position;
         }
         return properOrder;
-    }
+    } */
 
     public List<Vector3> CalcIntendedPositions(Vector3 destPos, Vector3 direction)
     {

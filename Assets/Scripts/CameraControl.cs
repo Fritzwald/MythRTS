@@ -6,6 +6,8 @@ public class CameraControl : MonoBehaviour
 {
 	public GameObject mainCamera;
     public float cameraVelocity = 5;
+    public Vector3 panBounds = new Vector3(30, 0, 30);
+
     public float rotateVelocity = 5;
 
     public float maxCameraVelocity = 50;
@@ -16,8 +18,8 @@ public class CameraControl : MonoBehaviour
 
     public float zoomSpeed = 5;
     
-	public float smoothTime = 0.06f;
-	private Vector3 scrollVelocity = Vector3.zero;
+	  public float smoothTime = 0.06f;
+	  private Vector3 scrollVelocity = Vector3.zero;
 
     private float screenWidth;
     private float screenHeight;
@@ -64,19 +66,19 @@ public class CameraControl : MonoBehaviour
 			}
 		}
 
-        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) || Input.mousePosition.x < screenWidth*0.01f + intBoundary)
+    if (transform.position.x > -panBounds.x && (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) || Input.mousePosition.x < screenWidth*0.01f + intBoundary))
 		{
 			transform.position += -transform.right*cameraVelocity*Time.deltaTime;
 		}
-		if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) || Input.mousePosition.y > screenHeight*0.99f - intBoundary)
+		if (transform.position.z < panBounds.z &&(Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) || Input.mousePosition.y > screenHeight*0.99f - intBoundary))
 		{
 			transform.position += transform.forward*cameraVelocity*Time.deltaTime;
 		}
-		if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) || Input.mousePosition.y < screenHeight*0.01f + intBoundary)
+		if (transform.position.z > -panBounds.z &&(Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) || Input.mousePosition.y < screenHeight*0.01f + intBoundary))
 		{
 			transform.position += -transform.forward*cameraVelocity*Time.deltaTime;
 		}
-		if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow) || Input.mousePosition.x > screenWidth*0.99f - intBoundary)
+		if (transform.position.x < panBounds.x &&(Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow) || Input.mousePosition.x > screenWidth*0.99f - intBoundary))
 		{
 			transform.position += transform.right*cameraVelocity*Time.deltaTime;
 		}
