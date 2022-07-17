@@ -183,20 +183,20 @@ public class UnitGroup : MonoBehaviour
         // Set group width and depth
         groupWidth = Math.Clamp(currentUnitCount, 0, unitProperties.groupDefaultUnitWidth) * unitSpacing;
         groupDepth = unitSpacing * maxRows;
+        Vector3 perpendicularDirection = new Vector3((direction.x == 0 ? (direction.z > 0 ? 10000000 : -10000000) : -1/direction.x), 0, 1/direction.z).normalized;
+        //possible cleaner alternative: must consider rotational direction, and unit position swapping
+        //Vector3 perpendicularDirection = new Vector3(-direction.z , 0, direction.x).normalized;
         for(int i = 0;i < currentUnitCount;i++){
             float rowNumber = (float)i/((float)unitProperties.groupDefaultUnitWidth);
             float unfinishedRowNumber = (float)(i+1)/((float)unitProperties.groupDefaultUnitWidth);
             int numberOfUnitsInLastRow = currentUnitCount - (int)(rowNumber)*unitProperties.groupDefaultUnitWidth;
-            Vector3 perpendicularDirection = new Vector3((direction.x == 0 ? (direction.z > 0 ? 10000000 : -10000000) : -1/direction.x), 0, 1/direction.z).normalized;
-            //possible cleaner alternative: must consider rotational direction, and unit position swapping
-            //Vector3 perpendicularDirection = new Vector3(-direction.z , 0, direction.x).normalized;
             Vector3 posSideOffset = perpendicularDirection*(unitSpacing*(i % unitProperties.groupDefaultUnitWidth));
             Vector3 posRowOffset = direction * unitSpacing * (int)rowNumber;
             // Centers rows
             Vector3 posCenterOffset = perpendicularDirection * ( Math.Clamp(currentUnitCount - 1, 0, unitProperties.groupDefaultUnitWidth - 1) * unitSpacing / 2);
             // Position units in last uneven row
             Vector3 posUnevenOffset = perpendicularDirection * (unitProperties.groupDefaultUnitWidth - numberOfUnitsInLastRow)*unitSpacing/2;
-            //print(posUnevenOffset);
+
             if((direction.z >= 0 && direction.x >= 0) || (direction.z < 0 && direction.x < 0)){
                 // Offset to the sides
                 Vector3 pos = destPos + posSideOffset;

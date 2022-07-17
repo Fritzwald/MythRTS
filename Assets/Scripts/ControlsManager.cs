@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class ControlsManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class ControlsManager : MonoBehaviour
     public LayerMask rightClickLayer;
     public int dragDirectionThreshold = 3;
     public float unitGroupSpacing = 1f;
+    public int unitGroupsDefaultCols = 3;
 
     private Vector3 worldStartPos = Vector3.zero;
     private Vector3 worldEndPos = Vector3.zero;
@@ -51,35 +53,59 @@ public class ControlsManager : MonoBehaviour
               Vector3 dragVector = worldEndPos - worldStartPos;
               Vector3 dragDirection = dragVector.normalized;
               bool useDragDir = dragVector.magnitude > dragDirectionThreshold;
+
+              // Array and lists to use during calculation
               List<UnitGroup> unitGroups = SelectedEntityManager.Instance.GetSelectedUnitGroups();
-              Vector3[] groupPositions = new Vector3[unitGroups.Count];
-              float[] groupWidths = new float[unitGroups.Count];
-              float[] groupOffsets = new float[unitGroups.Count];
+              List<Vector3> groupPositions = unitGroups.Select(unitGroup => unitGroup.transform.position).ToList();
 
-              // Calc group offset from group width plus previous group offset after first unit group
-              for (int i = 0; i < unitGroups.Count; i++) {
-                groupPositions[i] = unitGroups[i].transform.position;
-                float groupOffset = i != 0 ? unitGroups[i - 1].groupWidth + groupOffsets[i - 1] + unitGroupSpacing : 0;
-                groupOffsets[i] = groupOffset;
-              }
-
-              // Center group offsets by minusing half last (largest) offset
-              float centeringOffset = groupOffsets[groupOffsets.Length - 1] / 2;
-              for (int i = 0; i < groupOffsets.Length; i++) {
-                groupOffsets[i] -= centeringOffset;
-              }
               // Set direction based on drag or center point of all 
               Vector3 direction = useDragDir ? dragDirection : (worldStartPos - CenterOfVectors(groupPositions)).normalized;
+              // We may need to make this a global function to be used in multiple scripts?
+              Vector3 perpendicularDirection = new Vector3((direction.x == 0 ? (direction.z > 0 ? 10000000 : -10000000) : -1/direction.x), 0, 1/direction.z).normalized;
 
               // Do we maybe average all group direction, rather than just first??
               Quaternion directionAngle = Quaternion.FromToRotation(direction, unitGroups[0].groupDirection);
               float directionEuler = directionAngle.eulerAngles.y;
               if (directionEuler > 105 && directionEuler < 255) unitGroups.Reverse();
 
-              // We may need to make this a global function to be used in multiple scripts?
-              Vector3 perpendicularDirection = new Vector3((direction.x == 0 ? (direction.z > 0 ? 10000000 : -10000000) : -1/direction.x), 0, 1/direction.z).normalized;
+              // Calc group offset from group width plus previous group offset after first unit group
+              int unitGroupsCols = unitGroupsDefaultCols;
+              int maxRows = (int)(unitGroups.Count / unitGroupsCols);
+              float[] groupWidths = new float[unitGroups.Count];
+              float[] groupColOffsets = new float[unitGroups.Count];
+              float[] groupRowOffsets = new float[maxRows + 1];
+              float maxGroupDepth = 0f;
+              groupRowOffsets[0] = maxGroupDepth;
               for (int i = 0; i < unitGroups.Count; i++) {
-                Vector3 groupPosition = worldStartPos + (perpendicularDirection * groupOffsets[i]);
+                //Calc col offsets
+                float rowOrder = (float)i % (float)unitGroupsCols ;
+                float groupColOffset = rowOrder != 0 ? unitGroups[i - 1].groupWidth + groupColOffsets[i - 1] + unitGroupSpacing : 0;
+                groupColOffsets[i] = groupColOffset;
+
+                // calc Row offsets
+                maxGroupDepth = Mathf.Max(maxGroupDepth, unitGroups[i].groupDepth);
+                int rowNumber = (int)((float)i/(float)unitGroupsCols);
+                if (rowOrder == unitGroupsCols - 1 && rowNumber <= maxRows) {
+                  groupRowOffsets[rowNumber + 1] = maxGroupDepth;
+                  maxGroupDepth = 0f;
+                }
+              }
+
+              // Center group offsets by minusing half last (largest) offset
+              for (int i = 0; i < groupColOffsets.Length; i++) {
+                int rowNumber = (int)((float)i/(float)unitGroupsCols);
+                int rowCount = Mathf.Clamp(groupColOffsets.Length - (rowNumber * unitGroupsCols), 0, unitGroupsCols);
+                int lastIndexOfRow = Mathf.Clamp((Mathf.Max(rowNumber, 1) * rowCount) - 1, 0, Mathf.Min(groupColOffsets.Length - 1, unitGroups.Count - 1));
+                // get largest offset unless only one object in row then use width
+                float centeringOffset = (lastIndexOfRow != 0 ? groupColOffsets[lastIndexOfRow] : unitGroups[i].groupWidth) / 2 ;
+                groupColOffsets[i] -= centeringOffset;
+              }
+
+              for (int i = 0; i < unitGroups.Count; i++) {
+                int rowNumber = (int)((float)i/(float)unitGroupsCols);
+                Vector3 rowOffset = direction * groupRowOffsets[rowNumber];
+                Vector3 colOffset = perpendicularDirection * groupColOffsets[i];
+                Vector3 groupPosition = worldStartPos + colOffset - rowOffset;
                 unitGroups[i].IssueMoveCommand(groupPosition, true, direction);
               }
           }
@@ -99,9 +125,9 @@ public class ControlsManager : MonoBehaviour
       }
     }
 
-    public Vector3 CenterOfVectors( Vector3[] vectors ) {
+    public Vector3 CenterOfVectors( List<Vector3> vectors ) {
       Vector3 sum = Vector3.zero;
-      if( vectors == null || vectors.Length == 0 )
+      if( vectors == null || vectors.Count == 0 )
       {
           return sum;
       }
@@ -110,6 +136,6 @@ public class ControlsManager : MonoBehaviour
       {
           sum += vec;
       }
-      return sum/vectors.Length;
+      return sum/vectors.Count;
     }
 }
