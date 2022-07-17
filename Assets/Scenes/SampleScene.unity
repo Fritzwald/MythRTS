@@ -377,12 +377,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainCamera: {fileID: 963194225}
   cameraVelocity: 35
+  panBounds: {x: 30, y: 30}
   rotateVelocity: 25
   maxCameraVelocity: 50
   maxRotateVelocity: 12
   minZoom: 1
   maxZoom: 15
-  zoomSpeed: 5
+  zoomSpeed: 10
   smoothTime: 0.06
 --- !u!23 &86891688
 MeshRenderer:
@@ -2137,6 +2138,7 @@ MonoBehaviour:
   maxTotalHealth: 0
   currentTotalHealth: 0
   unitSpacing: 3
+  selected: 0
   groupUnits:
   - {fileID: 1573136275}
   - {fileID: 1524243570}
@@ -2377,6 +2379,7 @@ MonoBehaviour:
   rightClickLayer:
     serializedVersion: 2
     m_Bits: 64
+  dragDirectionThreshold: 5
 --- !u!114 &2014727628
 MonoBehaviour:
   m_ObjectHideFlags: 0

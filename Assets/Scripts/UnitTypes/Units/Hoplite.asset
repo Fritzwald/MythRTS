@@ -16,7 +16,7 @@ MonoBehaviour:
   maxHealth: 100
   attackDamage: 20
   range: 5
-  movementSpeed: 10
+  movementSpeed: 20
   attackSpeed: 5
   unitRadius: 1
   groupDefaultUnitWidth: 4

@@ -12,13 +12,14 @@ public class UnitGroup : MonoBehaviour
     public int maxTotalHealth;
     public int currentTotalHealth;
     public float unitSpacing;
+    public float groupWidth = 0f;
+    public float groupDepth = 0f;
     public bool selected = false;
     public List<Unit> groupUnits = new List<Unit>();
     public List<Vector3> intendedUnitPositions = new List<Vector3>();
     public UnitProperties unitProperties;
     public GameObject groupContainer;
-
-    public Vector3 unitDirection = Vector3.zero;
+    public Vector3 groupDirection = Vector3.zero;
 
 
     public virtual void Awake()
@@ -94,10 +95,10 @@ public class UnitGroup : MonoBehaviour
         Vector3 direction = useDir ? dir : (destinationPos - transform.position).normalized;
         direction.y = 0;
         intendedUnitPositions = CalcIntendedPositions(destinationPos, direction);
-        //this funciton needs work, something is wrong. how to find the most efficient unit pathing among the units?
-        // This might be okay now
+        // This funciton needs work, something is wrong. how to find the most efficient unit pathing among the units?
+        // This might not be needed now
         //List<Vector3> destPosWithOrder = FindPositionOrder(intendedUnitPositions);
-        Quaternion directionAngle = Quaternion.FromToRotation(direction, unitDirection);
+        Quaternion directionAngle = Quaternion.FromToRotation(direction, groupDirection);
         float directionEuler = directionAngle.eulerAngles.y;
         //print(directionEuler);
         if (directionEuler < 45 || directionEuler > 315) {
@@ -123,7 +124,7 @@ public class UnitGroup : MonoBehaviour
             //groupUnits[i].gameObject.GetComponent<NavMeshAgent>().SetDestination(intendedUnitPositions[i]);
             IssueUnitMoveCommand(intendedUnitPositions[i], i);
         }
-        unitDirection = direction;
+        groupDirection = direction;
     }
 
     private void IssueUnitMoveCommand(Vector3 pos, int unitIndex) {
@@ -179,6 +180,9 @@ public class UnitGroup : MonoBehaviour
         List<Vector3> positions = new List<Vector3>();
         direction.y = 0;
         int maxRows = (int)(currentUnitCount/unitProperties.groupDefaultUnitWidth);
+        // Set group width and depth
+        groupWidth = Math.Clamp(currentUnitCount, 0, unitProperties.groupDefaultUnitWidth) * unitSpacing;
+        groupDepth = unitSpacing * maxRows;
         for(int i = 0;i < currentUnitCount;i++){
             float rowNumber = (float)i/((float)unitProperties.groupDefaultUnitWidth);
             float unfinishedRowNumber = (float)(i+1)/((float)unitProperties.groupDefaultUnitWidth);
@@ -189,9 +193,9 @@ public class UnitGroup : MonoBehaviour
             Vector3 posSideOffset = perpendicularDirection*(unitSpacing*(i % unitProperties.groupDefaultUnitWidth));
             Vector3 posRowOffset = direction * unitSpacing * (int)rowNumber;
             // Centers rows
-            Vector3 posCenterOffset = perpendicularDirection*(Math.Clamp(currentUnitCount-1,0,unitProperties.groupDefaultUnitWidth-1)*unitSpacing/2);
+            Vector3 posCenterOffset = perpendicularDirection * ( Math.Clamp(currentUnitCount - 1, 0, unitProperties.groupDefaultUnitWidth - 1) * unitSpacing / 2);
             // Position units in last uneven row
-            Vector3 posUnevenOffset = perpendicularDirection*(unitProperties.groupDefaultUnitWidth - numberOfUnitsInLastRow)*unitSpacing/2;
+            Vector3 posUnevenOffset = perpendicularDirection * (unitProperties.groupDefaultUnitWidth - numberOfUnitsInLastRow)*unitSpacing/2;
             //print(posUnevenOffset);
             if((direction.z >= 0 && direction.x >= 0) || (direction.z < 0 && direction.x < 0)){
                 // Offset to the sides
