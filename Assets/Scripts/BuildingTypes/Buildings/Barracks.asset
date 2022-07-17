@@ -17,7 +17,7 @@ MonoBehaviour:
   attackDamage: 0
   range: 0
   attackSpeed: 0
-  defaultRallyOffset: {x: 0, y: 0, z: -7}
+  defaultRallyOffset: {x: 0, y: 0, z: -10}
   buildingPrefab: {fileID: 7086754130036235220, guid: 5362b29a7dd8c474b888e6d1cd3bd357,
     type: 3}
   buildingIcon: {fileID: 21300000, guid: af0765c0b9ca80f489c584306162b2e7, type: 3}

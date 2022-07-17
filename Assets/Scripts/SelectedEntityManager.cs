@@ -25,7 +25,8 @@ public class SelectedEntityManager : MonoBehaviour
             ent.Deselect();
         }
         selectedEntities.Clear();
-        selectedUnitGroups.Clear();selectionType = selectionTypes.None;
+        selectedUnitGroups.Clear();
+        selectionType = selectionTypes.None;
         UIManager.Instance.RedrawMenu();
     }
 
@@ -51,7 +52,7 @@ public class SelectedEntityManager : MonoBehaviour
                 UIManager.Instance.RedrawMenu(selectedUnitGroups);
             break;
             case selectionTypes.Building:
-                UIManager.Instance.RedrawMenu(selectedEntities.Cast<Building>().ToList());
+                UIManager.Instance.RedrawMenu(GetSelectedBuildings());
             break;
             case selectionTypes.OtherPlayer:
 
@@ -60,7 +61,15 @@ public class SelectedEntityManager : MonoBehaviour
         
     }
 
-    public List<UnitGroup> GetSelectedUnitGroups(){
+    public selectionTypes GetSelectionType() {
+        return selectionType;
+    }
+
+    public List<UnitGroup> GetSelectedUnitGroups() {
         return selectedUnitGroups;
+    }
+
+    public List<Building> GetSelectedBuildings() {
+        return selectedEntities.Cast<Building>().ToList();
     }
 }
