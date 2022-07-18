@@ -46,10 +46,11 @@ namespace cakeslice
 			SkinnedMeshRenderer = GetComponent<SkinnedMeshRenderer>();
 			SpriteRenderer = GetComponent<SpriteRenderer>();
 			MeshFilter = GetComponent<MeshFilter>();
+			//OutlineEffect.Instance?.RemoveOutline(this);
 		}
 
 		private void Start() {
-			OutlineEffect.Instance?.RemoveOutline(this);
+			
 		}
 
 

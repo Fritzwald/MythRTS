@@ -14,6 +14,7 @@ public class Building : PlayerEntity
     // Start is called before the first frame update
     public override void Start()
     {
+        gameObject.GetComponent<Outline>().DisableOutline();
         rallyPoint = transform.position + buildingProperties.defaultRallyOffset;
         rallyPoint.y = 1;
         //print(new Vector3(transform.position.x, 1, transform.position.z - 7))
