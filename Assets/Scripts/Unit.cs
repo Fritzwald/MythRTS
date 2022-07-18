@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using cakeslice;
 
 
 public class Unit : PlayerEntity
@@ -9,7 +10,15 @@ public class Unit : PlayerEntity
 
     public override void Awake() {
         base.Awake();
+        
     }
+
+    public override void Start(){
+        base.Start();
+        if(!unitGroup.selected)
+            gameObject.GetComponent<Outline>().DisableOutline();
+    }
+
 
     public void AssignUnitState(PlayerEnumerator.Players playerID, Vector3 startPosition, int startHealth, int startMaxHealth, UnitGroup group)
     {
