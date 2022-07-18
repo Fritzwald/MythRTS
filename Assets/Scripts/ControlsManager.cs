@@ -59,7 +59,7 @@ public class ControlsManager : MonoBehaviour
               List<Vector3> groupPositions = unitGroups.Select(unitGroup => unitGroup.transform.position).ToList();
 
               // Set direction based on drag or center point of all 
-              Vector3 direction = useDragDir ? dragDirection : (worldStartPos - CenterOfVectors(groupPositions)).normalized;
+              Vector3 direction = useDragDir ? dragDirection : (worldStartPos - (groupPositions.Count == 1 ? groupPositions[0] : CenterOfVectors(groupPositions))).normalized;
               // We may need to make this a global function to be used in multiple scripts?
               Vector3 perpendicularDirection = new Vector3((direction.x == 0 ? (direction.z > 0 ? 10000000 : -10000000) : -1/direction.x), 0, 1/direction.z).normalized;
 
@@ -78,7 +78,7 @@ public class ControlsManager : MonoBehaviour
               groupRowOffsets[0] = maxGroupDepth;
               for (int i = 0; i < unitGroups.Count; i++) {
                 //Calc col offsets
-                float rowOrder = (float)i % (float)unitGroupsCols ;
+                float rowOrder = (float)i % (float)unitGroupsCols;
                 float groupColOffset = rowOrder != 0 ? unitGroups[i - 1].groupWidth + groupColOffsets[i - 1] + unitGroupSpacing : 0;
                 groupColOffsets[i] = groupColOffset;
 
@@ -100,13 +100,16 @@ public class ControlsManager : MonoBehaviour
                 float centeringOffset = (lastIndexOfRow != 0 ? groupColOffsets[lastIndexOfRow] : unitGroups[i].groupWidth) / 2 ;
                 groupColOffsets[i] -= centeringOffset;
               }
-
-              for (int i = 0; i < unitGroups.Count; i++) {
-                int rowNumber = (int)((float)i/(float)unitGroupsCols);
-                Vector3 rowOffset = direction * groupRowOffsets[rowNumber];
-                Vector3 colOffset = perpendicularDirection * groupColOffsets[i];
-                Vector3 groupPosition = worldStartPos + colOffset - rowOffset;
-                unitGroups[i].IssueMoveCommand(groupPosition, true, direction);
+              if (unitGroups.Count != 1) {
+                for (int i = 0; i < unitGroups.Count; i++) {
+                  int rowNumber = (int)((float)i/(float)unitGroupsCols);
+                  Vector3 rowOffset = direction * groupRowOffsets[rowNumber];
+                  Vector3 colOffset = perpendicularDirection * groupColOffsets[i];
+                  Vector3 groupPosition = worldStartPos + colOffset - rowOffset;
+                  unitGroups[i].IssueMoveCommand(groupPosition, true, direction);
+                }
+              } else {
+                unitGroups[0].IssueMoveCommand(worldStartPos, true, direction);
               }
           }
         }

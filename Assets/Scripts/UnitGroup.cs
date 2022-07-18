@@ -107,7 +107,27 @@ public class UnitGroup : MonoBehaviour
         } else if (directionEuler < 105) {
             //go left
         } else if (directionEuler < 255) {
-            groupUnits.Reverse();
+            int endRowUnitCount = groupUnits.Count % unitProperties.groupDefaultUnitWidth;
+            print(endRowUnitCount);
+            int endRowMissingCount = unitProperties.groupDefaultUnitWidth - endRowUnitCount;
+            //groupUnits.Reverse();
+            List<Unit> tempGroupUnits = groupUnits;
+            tempGroupUnits.Reverse();
+            for (int i = 0; i < groupUnits.Count - endRowUnitCount; i++) {
+              if (i % unitProperties.groupDefaultUnitWidth == 0) {
+                print("================");
+                print(i);
+                for (int j = 0; j < endRowMissingCount; j++) {
+                  int moveIndex = i + j;
+                  int moveFrom = tempGroupUnits.Count - 1 - moveIndex;
+                  print("moveFrom" + moveFrom);
+                  int moveTo = moveFrom - endRowUnitCount;
+                  print("moveTo" + moveTo);
+                  ListIndexSwap(tempGroupUnits, moveFrom, moveTo);
+                }
+              }
+            }
+            groupUnits = tempGroupUnits;
             
             //go back
             /*
@@ -239,10 +259,17 @@ public class UnitGroup : MonoBehaviour
 
     }
 
+    public void ListIndexSwap<T>(IList<T> list, int indexA, int indexB)
+    {
+        T tmp = list[indexA];
+        list[indexA] = list[indexB];
+        list[indexB] = tmp;
+    }
+
     
 }
 
-class PositionToDistance{
+class PositionToDistance {
     public Vector3 position;
     public float distance;
 
